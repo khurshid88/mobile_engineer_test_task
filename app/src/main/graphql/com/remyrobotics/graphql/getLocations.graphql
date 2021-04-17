@@ -1,0 +1,21 @@
+query GetLocaltions($page:Int!, $search:String!) {
+    locations(page: $page, filter: {name: $search}) {
+        info{
+            count
+            pages
+            next
+            prev
+        }
+        results{
+            id
+            name
+            type
+            dimension
+            residents{
+                name
+                image
+                species
+            }
+        }
+    }
+}

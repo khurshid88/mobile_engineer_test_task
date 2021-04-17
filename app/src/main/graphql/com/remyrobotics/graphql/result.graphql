@@ -1,0 +1,10 @@
+query Result {
+    characters {
+        results {
+            name
+            species
+            gender
+            image
+        }
+    }
+}
