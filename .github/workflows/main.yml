@@ -1,0 +1,50 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        api-level: [21, 29]
+        arch: [x86, x86_64]
+        exclude:
+          - api-level: 21
+            arch: x86_64
+          - api-level: 29
+            arch: x86
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        # Execute unit tests
+      - name: Unit tests
+        run: bash ./gradlew test --stacktrace
+        # Execute instrumented tests
+      - name: Espresso tests
+        uses: reactivecircus/android-emulator-runner@v1
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          script: ./gradlew connectedCheck
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: instrumentation_test_report
+          path: app/build/reports/androidTests/connected/
+        # Generate an Apk
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Get Debug APK
+        uses: actions/upload-artifact@v2.1.4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
